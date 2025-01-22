@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -68,3 +69,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+=======
+# Baze_2
+Projekat za faks
+Ovde cemo pokusati da nas projekat objasnimo maksimalno po koracima sta je svako od nas radio na ovom projektu. 
+Na projektu rade: Marta Ignjatovic 601/2020; Aleksa Cirkovic 607/2018; Predrag Nikolic 642/2017.
+>>>>>>> 5ef7fedfd635c3377ac987098d7d007889e36b72
