@@ -6,6 +6,8 @@ const GoogleFormsPage = () => {
     const [questions, setQuestions] = useState([]);
     const [formTitle, setFormTitle] = useState("");
     const [formDescription, setFormDescription] = useState("");
+    const [allowAnonymous, setAllowAnonymous] = useState(false);
+    const [responses, setResponses] = useState({});
 
     const addQuestion = () => {
         setQuestions([...questions, {
@@ -17,7 +19,8 @@ const GoogleFormsPage = () => {
             min: null,
             max: null,
             step: null,
-            image: null
+            image: null,
+            maxSelections: null
         }]);
     };
 
@@ -47,9 +50,13 @@ const GoogleFormsPage = () => {
         }
     };
 
+    const handleResponseChange = (id, value) => {
+        setResponses({ ...responses, [id]: value });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log({ formTitle, formDescription, questions });
+        console.log({ formTitle, formDescription, allowAnonymous, questions, responses });
     };
 
     return (
@@ -78,6 +85,16 @@ const GoogleFormsPage = () => {
                             onChange={(e) => setFormDescription(e.target.value)}
                         ></textarea>
                     </div>
+                    <div className="form-group">
+                        <label>
+                            Allow anonymous responses
+                            <input
+                                type="checkbox"
+                                checked={allowAnonymous}
+                                onChange={(e) => setAllowAnonymous(e.target.checked)}
+                            />
+                        </label>
+                    </div>
                     {questions.map((q, index) => (
                         <div className="form-group" key={q.id}>
                             <label>Question {q.id}</label>
@@ -99,6 +116,36 @@ const GoogleFormsPage = () => {
                                 <option value="date">Date</option>
                                 <option value="time">Time</option>
                             </select>
+                            {q.type === "multipleChoice" && (
+                                <input
+                                    type="number"
+                                    placeholder="Max selections"
+                                    value={q.maxSelections || ""}
+                                    onChange={(e) => updateQuestion(q.id, "maxSelections", parseInt(e.target.value))}
+                                />
+                            )}
+                            {q.type === "number" && (
+                                <>
+                                    <input
+                                        type="number"
+                                        placeholder="Min"
+                                        value={q.min || ""}
+                                        onChange={(e) => updateQuestion(q.id, "min", parseInt(e.target.value))}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Max"
+                                        value={q.max || ""}
+                                        onChange={(e) => updateQuestion(q.id, "max", parseInt(e.target.value))}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Step"
+                                        value={q.step || ""}
+                                        onChange={(e) => updateQuestion(q.id, "step", parseInt(e.target.value))}
+                                    />
+                                </>
+                            )}
                             <input type="file" onChange={(e) => updateQuestion(q.id, "image", e.target.files[0])} />
                             {q.image && <img src={URL.createObjectURL(q.image)} alt="Question Image" className="question-image" />}
                             <div>
@@ -107,16 +154,18 @@ const GoogleFormsPage = () => {
                                 <button type="button" onClick={() => moveQuestion(q.id, -1)}>Move Up</button>
                                 <button type="button" onClick={() => moveQuestion(q.id, 1)}>Move Down</button>
                             </div>
+                            <input
+                                type={q.type === "date" ? "date" : q.type === "time" ? "time" : "text"}
+                                placeholder={q.type === "shortText" ? "Max 512 chars" : q.type === "longText" ? "Max 4096 chars" : ""}
+                                maxLength={q.type === "shortText" ? 512 : q.type === "longText" ? 4096 : undefined}
+                                value={responses[q.id] || ""}
+                                onChange={(e) => handleResponseChange(q.id, e.target.value)}
+                            />
                         </div>
                     ))}
                     <button type="button" className="form-button" onClick={addQuestion}>Add Question</button>
                     <button type="submit" className="form-button">Submit</button>
                 </form>
-                <div>
-                    <h3>Share your form</h3>
-                    <input type="text" value={window.location.href} readOnly />
-                    <button onClick={() => navigator.clipboard.writeText(window.location.href)}>Copy Link</button>
-                </div>
             </main>
         </div>
     );
