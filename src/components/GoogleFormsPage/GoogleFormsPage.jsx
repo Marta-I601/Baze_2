@@ -16,12 +16,35 @@ const GoogleFormsPage = () => {
             options: [],
             min: null,
             max: null,
-            step: null
+            step: null,
+            image: null
         }]);
     };
 
     const updateQuestion = (id, field, value) => {
         setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
+    };
+
+    const cloneQuestion = (id) => {
+        const questionToClone = questions.find(q => q.id === id);
+        if (questionToClone) {
+            setQuestions([...questions, { ...questionToClone, id: questions.length + 1 }]);
+        }
+    };
+
+    const deleteQuestion = (id) => {
+        setQuestions(questions.filter(q => q.id !== id));
+    };
+
+    const moveQuestion = (id, direction) => {
+        const index = questions.findIndex(q => q.id === id);
+        if (index < 0) return;
+        const newQuestions = [...questions];
+        const newIndex = index + direction;
+        if (newIndex >= 0 && newIndex < questions.length) {
+            [newQuestions[index], newQuestions[newIndex]] = [newQuestions[newIndex], newQuestions[index]];
+            setQuestions(newQuestions);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -55,7 +78,7 @@ const GoogleFormsPage = () => {
                             onChange={(e) => setFormDescription(e.target.value)}
                         ></textarea>
                     </div>
-                    {questions.map((q) => (
+                    {questions.map((q, index) => (
                         <div className="form-group" key={q.id}>
                             <label>Question {q.id}</label>
                             <input
@@ -76,60 +99,24 @@ const GoogleFormsPage = () => {
                                 <option value="date">Date</option>
                                 <option value="time">Time</option>
                             </select>
-                            {q.type === "multipleChoice" || q.type === "singleChoice" ? (
-                                <div>
-                                    <button type="button" onClick={() => updateQuestion(q.id, "options", [...q.options, ""])}>
-                                        Add Option
-                                    </button>
-                                    {q.options.map((opt, idx) => (
-                                        <input
-                                            key={idx}
-                                            type="text"
-                                            placeholder={`Option ${idx + 1}`}
-                                            value={opt}
-                                            onChange={(e) => {
-                                                const newOptions = [...q.options];
-                                                newOptions[idx] = e.target.value;
-                                                updateQuestion(q.id, "options", newOptions);
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            ) : null}
-                            {q.type === "number" ? (
-                                <div>
-                                    <input
-                                        type="number"
-                                        placeholder="Min"
-                                        onChange={(e) => updateQuestion(q.id, "min", e.target.value)}
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder="Max"
-                                        onChange={(e) => updateQuestion(q.id, "max", e.target.value)}
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder="Step"
-                                        onChange={(e) => updateQuestion(q.id, "step", e.target.value)}
-                                    />
-                                </div>
-                            ) : null}
+                            <input type="file" onChange={(e) => updateQuestion(q.id, "image", e.target.files[0])} />
+                            {q.image && <img src={URL.createObjectURL(q.image)} alt="Question Image" className="question-image" />}
                             <div>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={q.required}
-                                        onChange={(e) => updateQuestion(q.id, "required", e.target.checked)}
-                                    />
-                                    Required
-                                </label>
+                                <button type="button" onClick={() => cloneQuestion(q.id)}>Clone</button>
+                                <button type="button" onClick={() => deleteQuestion(q.id)}>Delete</button>
+                                <button type="button" onClick={() => moveQuestion(q.id, -1)}>Move Up</button>
+                                <button type="button" onClick={() => moveQuestion(q.id, 1)}>Move Down</button>
                             </div>
                         </div>
                     ))}
                     <button type="button" className="form-button" onClick={addQuestion}>Add Question</button>
                     <button type="submit" className="form-button">Submit</button>
                 </form>
+                <div>
+                    <h3>Share your form</h3>
+                    <input type="text" value={window.location.href} readOnly />
+                    <button onClick={() => navigator.clipboard.writeText(window.location.href)}>Copy Link</button>
+                </div>
             </main>
         </div>
     );
