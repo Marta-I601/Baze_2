@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -71,7 +70,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 =======
 # Baze_2
-Projekat za faks
+/*Projekat za faks*/
 Ovde cemo pokusati da nas projekat objasnimo maksimalno po koracima sta je svako od nas radio na ovom projektu. 
-Na projektu rade: Marta Ignjatovic 601/2020; Aleksa Cirkovic 607/2018; Predrag Nikolic 642/2017.
->>>>>>> 5ef7fedfd635c3377ac987098d7d007889e36b72
+Na projektu rade: Marta Ignjatovic 601/2020 (Frontend i testing); Aleksa Cirkovic 607/2018 (Kubernetis i fullstack); Predrag Nikolic 642/2017 (Backend i Devops).
+Obzirom da je registracija i logovanje korisnika neophodno da bi neko mogao da pravi formu uredjuje i prosledjuje nas prvi korak je bio da napravimo loginRegister.jsx formu koja je propracena adekvatnim css-om i bazom podataka koja ce pamtiti sve te zabelezene ulaze i logovanja nasih korisnika.
+Sto se tice front i testing dela radila je koleginica Marta Ignjatovic, dok je deo oko php i baze mysql radio kolega Predrag Nikolic.
+Dalji razvoj forme i strane na kojojj ce se praviti je radjen opet u jsx kao GoogleFormsPage propracen css file-om (opet front i testing). Neophodan je dalji razvoj stranice i ubacivanje role-a za uredjivanje forme. 
