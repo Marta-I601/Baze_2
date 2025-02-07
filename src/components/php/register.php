@@ -1,18 +1,16 @@
 <?php
 include 'connect.php';
 
-
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:3000"); // Dozvoli zahteve sa frontend-a
-header("Access-Control-Allow-Headers: Content-Type, Authorization"); // Omogući specifične zaglavlja
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Dozvoli metode (uklj. OPTIONS)
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-if (isset($conn)) {
-    echo "Konekcija je uspešno uspostavljena.";
-} else {
-    echo "Konekcija nije definisana.";
+// Provera konekcije
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Database connection not defined"]);
+    exit;
 }
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"));
@@ -22,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // REGISTRACIJA
     if (isset($data->action) && $data->action === 'signUp') {
         if (!isset($data->username, $data->email, $data->password)) {
             echo json_encode(["success" => false, "message" => "Missing required fields"]);
@@ -30,35 +29,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $username = $data->username;
         $email = $data->email;
-        $password = $data->password;
+        $password = $data->password; // Lozinka ostaje neheširana
 
+        // Proveri da li email već postoji
         $checkEmail = "SELECT * FROM probna WHERE email = ?";
         $stmt = $conn->prepare($checkEmail);
         $stmt->bind_param("s", $email);
-
-        if (!$stmt->execute()) {
-            echo json_encode(["success" => false, "message" => "SQL Error: " . $stmt->error]);
-            exit;
-        }
-
+        $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             echo json_encode(["success" => false, "message" => "Email address already exists!"]);
         } else {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            // Lozinku čuvamo direktno u bazi (NE PREPORUČUJE SE!)
             $insertQuery = "INSERT INTO probna (username, email, password) VALUES (?, ?, ?)";
             $stmt = $conn->prepare($insertQuery);
-            $stmt->bind_param("sss", $username, $email, $hashedPassword);
+            $stmt->bind_param("sss", $username, $email, $password);
 
             if ($stmt->execute()) {
                 echo json_encode(["success" => true, "message" => "User registered successfully!"]);
             } else {
-                error_log("Insert error: " . $stmt->error);
                 echo json_encode(["success" => false, "message" => "Database error occurred"]);
             }
         }
-    } elseif (isset($data->action) && $data->action === 'signIn') {
+    } 
+    
+    // LOGIN
+    elseif (isset($data->action) && $data->action === 'signIn') {
         if (!isset($data->email, $data->password)) {
             echo json_encode(["success" => false, "message" => "Missing email or password"]);
             exit;
@@ -67,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $data->email;
         $password = $data->password;
 
+        // Pronalazimo korisnika po emailu
         $sql = "SELECT * FROM probna WHERE email = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $email);
@@ -75,7 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            if (password_verify($password, $row['password'])) {
+            
+            // **Sada samo upoređujemo običan string, bez `password_verify()`**
+            if ($password === $row['password']) {
                 session_start();
                 $_SESSION['email'] = $row['email'];
                 echo json_encode(["success" => true, "message" => "Login successful"]);
@@ -85,10 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo json_encode(["success" => false, "message" => "Email not found"]);
         }
-    } else {
+    } 
+    
+    // Ako akcija nije validna
+    else {
         echo json_encode(["success" => false, "message" => "Invalid action"]);
     }
 }
-/*RETARDE NE TREBA DA PISES OVDE NEGO BILO STA VEZANO ZA BAZU IDE SA C/PHP/HTDOCS 
-PA TU PISES I MENJAS A OVAKO NECE NISTA DA TI SE POKAZE KAD POKRENES XAMPP I POSTMAN.... */
 ?>
