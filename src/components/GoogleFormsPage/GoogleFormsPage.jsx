@@ -63,7 +63,7 @@ const GoogleFormsPage = () => {
     return (
         <div className="google-forms-container">
             <header className="google-forms-header">
-                <h1>Google Forms Clone</h1>
+                <h1>Google Forms</h1>
             </header>
             <main className="google-forms-main">
                 <form className="forms" onSubmit={handleSubmit}>
