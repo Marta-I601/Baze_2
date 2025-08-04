@@ -9,45 +9,43 @@ export const LoginRegister = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const navigate = useNavigate(); // Za navigaciju
+  const navigate = useNavigate();
 
-  const toggleToRegister = () => {
-    setIsRegister(true); // Prelazak na registraciju
-  };
-
-  const toggleToLogin = () => {
-    setIsRegister(false); // Povratak na login
-  };
+  const toggleToRegister = () => setIsRegister(true);
+  const toggleToLogin = () => setIsRegister(false);
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    
+
     try {
       const response = await fetch('http://localhost/php/register.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'signIn', email, password }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'signIn', email, password }),
       });
 
+      console.log("Response status:", response.status);
+
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (data.success) {
-        alert('Login successful!');
-        navigate('/dashboard');
+          alert('Login successful!');
+          navigate('/dashboard');
       } else {
-        alert(data.message || "Invalid email or password!");
+          alert(data.message || 'Invalid email or password!');
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Error during login:', error);
-      alert("An error occurred while trying to log in.");
-    }
-  };
+      alert('An error occurred while trying to log in.');
+  }
+};
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      alert('Passwords do not match.');
       return;
     }
 
@@ -57,6 +55,7 @@ export const LoginRegister = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'signUp', username, email, password }),
       });
+
       const data = await response.json();
 
       if (data.success) {
@@ -77,24 +76,24 @@ export const LoginRegister = () => {
         <form onSubmit={handleLogin}>
           <h1>Login</h1>
           <div className="input-box">
-            <input 
-              type="text" 
-              name="username" 
-              placeholder="Username" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              type="email"
+              name="email" // Ispravljeno
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
-            <FaUser className="icon" />
+            <FaEnvelope className="icon" />
           </div>
           <div className="input-box">
-            <input 
-              type="password" 
-              name="password" 
-              placeholder="Password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <FaLock className="icon" />
           </div>
@@ -104,23 +103,20 @@ export const LoginRegister = () => {
             </label>
             <a href="#">Forgot password?</a>
           </div>
-          <button type="submit" name="signIn">Login</button>
+          <button type="submit">Login</button>
           <div className="register-link">
             <p>
-              Don't have an account?{' '}
-              <a href="#" onClick={toggleToRegister}>Register</a>
+              Don't have an account? <a href="#" onClick={toggleToRegister}>Register</a>
             </p>
           </div>
           <div className="register-link">
             <p>
-              Already have an account?{' '}
-              <a href="https://myaccount.google.com/" onClick={toggleToRegister}>SignIn with Google!</a>
+              <a href="https://myaccount.google.com/">Sign in with Google!</a> {/* Uklonjen onClick /}
             </p>
           </div>
           <div className="register-link">
             <p>
-              Already have an account?{' '}
-              <a href="https://www.facebook.com/login.php/" onClick={toggleToRegister}>SignIn with Facebook!</a>
+              <a href="https://www.facebook.com/login.php/">Sign in with Facebook!</a> {/ Uklonjen onClick */}
             </p>
           </div>
         </form>
@@ -130,46 +126,46 @@ export const LoginRegister = () => {
         <form onSubmit={handleRegister}>
           <h1>Registration</h1>
           <div className="input-box">
-            <input 
-              type="text" 
-              name="username" 
-              placeholder="Username" 
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
-              required 
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
             />
             <FaUser className="icon" />
           </div>
           <div className="input-box">
-            <input 
-              type="email" 
-              name="email" 
-              placeholder="Email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <FaEnvelope className="icon" />
           </div>
           <div className="input-box">
-            <input 
-              type="password" 
-              name="password" 
-              placeholder="Password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <FaLock className="icon" />
           </div>
           <div className="input-box">
-            <input 
-              type="password" 
-              name="confirmPassword" 
-              placeholder="Confirm Password" 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
             />
             <FaLock className="icon" />
           </div>
@@ -178,11 +174,10 @@ export const LoginRegister = () => {
               <input type="checkbox" /> I agree to the terms & conditions!
             </label>
           </div>
-          <button type="submit" name="signUp">Register</button>
+          <button type="submit">Register</button>
           <div className="register-link">
             <p>
-              Already have an account?{' '}
-              <a href="#" onClick={toggleToLogin}>Login</a>
+              Already have an account? <a href="#" onClick={toggleToLogin}>Login</a>
             </p>
           </div>
         </form>
