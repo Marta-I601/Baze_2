@@ -1,94 +1,167 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./GoogleFormsPage.css";
-import { useNavigate } from "react-router-dom";
-import { BsParagraph } from "react-icons/bs";
+import { v4 as uuidv4 } from "uuid";
 
-const GoogleFormsPage = () => {
+const GoogleFormsPage = ({ currentUser }) => {
     const [questions, setQuestions] = useState([]);
     const [formTitle, setFormTitle] = useState("");
     const [formDescription, setFormDescription] = useState("");
     const [allowAnonymous, setAllowAnonymous] = useState(false);
-    const [responses, setResponses] = useState({});
+    const [shareLink, setShareLink] = useState("");
 
-    const addQuestion = () => {
-        setQuestions([...questions, {
-            id: questions.length + 1,
-            text: "",
-            type: "shortText",
-            required: false,
-            options: [],
-            min: null,
-            max: null,
-            step: null,
-            image: null,
-            maxSelections: null
-        }]);
+//  Tema (svetlo/tamno)
+ const [darkMode, setDarkMode] = useState(() => {
+        return localStorage.getItem("theme") === "dark";
+            });
+   useEffect(() => {
+        if (darkMode) {
+            document.body.classList.add("dark-mode");
+        } else {
+            document.body.classList.remove("dark-mode");
+        }
+    }, [darkMode]);
+
+    const toggleDarkMode = () => {
+        setDarkMode(prev => !prev);
     };
 
+    // Dodaj novo pitanje
+    const addQuestion = () => {
+        setQuestions([
+            ...questions,
+            {
+                id: uuidv4(),
+                text: "",
+                type: "shortText",
+                required: false,
+                options: [],
+                maxSelections: null,
+                min: null,
+                max: null,
+                step: null,
+                image: null,
+            }
+        ]);
+    };
+
+    // Ažuriraj polje pitanja
     const updateQuestion = (id, field, value) => {
         setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
     };
 
+    // Dodaj opciju odgovora (za single/multiple choice)
+    const addOption = (id) => {
+        setQuestions(questions.map(q =>
+            q.id === id
+                ? { ...q, options: [...q.options, { id: uuidv4(), text: "", image: null }] }
+                : q
+        ));
+    };
+
+    // Ažuriraj opciju odgovora
+    const updateOption = (qId, optId, field, value) => {
+        setQuestions(questions.map(q =>
+            q.id === qId
+                ? {
+                    ...q,
+                    options: q.options.map(o =>
+                        o.id === optId ? { ...o, [field]: value } : o
+                    )
+                }
+                : q
+        ));
+    };
+
+    // Kloniraj pitanje
     const cloneQuestion = (id) => {
         const questionToClone = questions.find(q => q.id === id);
         if (questionToClone) {
-            setQuestions([...questions, { ...questionToClone, id: questions.length + 1 }]);
+            setQuestions([...questions, { ...questionToClone, id: uuidv4() }]);
         }
     };
 
+    // Obriši pitanje
     const deleteQuestion = (id) => {
         setQuestions(questions.filter(q => q.id !== id));
     };
 
+    // Promeni redosled pitanja
     const moveQuestion = (id, direction) => {
         const index = questions.findIndex(q => q.id === id);
         if (index < 0) return;
-        const newQuestions = [...questions];
         const newIndex = index + direction;
-        if (newIndex >= 0 && newIndex < questions.length) {
-            [newQuestions[index], newQuestions[newIndex]] = [newQuestions[newIndex], newQuestions[index]];
-            setQuestions(newQuestions);
+        if (newIndex < 0 || newIndex >= questions.length) return;
+        const updated = [...questions];
+        [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+        setQuestions(updated);
+    };
+
+    // Generiši listu brojeva za numeric tip
+    const generateNumberList = (min, max, step) => {
+        let list = [];
+        for (let i = min; i <= max; i += step) {
+            list.push(i);
         }
+        return list;
     };
 
-    const handleResponseChange = (id, value) => {
-        setResponses({ ...responses, [id]: value });
+    // Kreiraj link za deljenje
+    const createShareLink = () => {
+        const link = `${window.location.origin}/fill-form/${uuidv4()}`;
+        setShareLink(link);
     };
 
+    // Submit forme
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log({ formTitle, formDescription, allowAnonymous, questions, responses });
+        console.log({
+            formTitle,
+            formDescription,
+            allowAnonymous,
+            questions
+        });
     };
 
     return (
         <div className="google-forms-container">
             <header className="google-forms-header">
-                <h1>Google Forms</h1>
+                <div className="header-left">
+                 Dobrodosao na Google Formu!</div>
+                 <div>
+                    <h2>Google Forms</h2>
+                </div>
+                <div className="header-right">
+                    <button onClick={toggleDarkMode}>
+                        {darkMode ? "🌙 Tamni mod" : "☀️ Svetli mod"}
+                    </button></div>
+                    <div>
+                    <button onClick={createShareLink}>Generiši link</button>
+                </div>
+                {shareLink && <p>Link: <a href={shareLink}>{shareLink}</a></p>}
             </header>
+
             <main className="google-forms-main">
                 <form className="forms" onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="form-title">Form Title</label>
+                        <label>Naziv forme</label>
                         <input
                             type="text"
-                            id="form-title"
-                            placeholder="Enter form title"
                             value={formTitle}
                             onChange={(e) => setFormTitle(e.target.value)}
+                            placeholder="Unesite naziv"
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="form-description">Description</label>
+                        <label>Opis</label>
                         <textarea
-                            id="form-description"
-                            placeholder="Enter form description"
                             value={formDescription}
                             onChange={(e) => setFormDescription(e.target.value)}
+                            placeholder="Unesite opis"
                         ></textarea>
                     </div>
                     <div className="form-group">
                         <label>
-                            Allow anonymous responses
+                            Dozvoli anonimne odgovore
                             <input
                                 type="checkbox"
                                 checked={allowAnonymous}
@@ -96,35 +169,84 @@ const GoogleFormsPage = () => {
                             />
                         </label>
                     </div>
-                    {questions.map((q, index) => (
-                        <div className="form-group" key={q.id}>
-                            <label>Question {q.id}</label>
+
+                    {questions.map((q) => (
+                        <div key={q.id} className="question-block">
                             <input
                                 type="text"
-                                placeholder="Enter your question"
+                                placeholder="Unesite pitanje"
                                 value={q.text}
                                 onChange={(e) => updateQuestion(q.id, "text", e.target.value)}
                             />
+                            <label>
+                                Obavezno
+                                <input
+                                    type="checkbox"
+                                    checked={q.required}
+                                    onChange={(e) => updateQuestion(q.id, "required", e.target.checked)}
+                                />
+                            </label>
                             <select
                                 value={q.type}
                                 onChange={(e) => updateQuestion(q.id, "type", e.target.value)}
                             >
-                                <option value="shortText">Short Text</option>
-                                <option value="longText">Long Text</option>
-                                <option value="singleChoice">Single Choice</option>
-                                <option value="multipleChoice">Multiple Choice</option>
-                                <option value="number">Number</option>
-                                <option value="date">Date</option>
-                                <option value="time">Time</option>
+                                <option value="shortText">Kratak tekst (max 512)</option>
+                                <option value="longText">Dug tekst (max 4096)</option>
+                                <option value="singleChoice">Jedan izbor</option>
+                                <option value="multipleChoice">Više izbora</option>
+                                <option value="number">Broj</option>
+                                <option value="date">Datum</option>
+                                <option value="time">Vreme</option>
                             </select>
+
                             {q.type === "multipleChoice" && (
-                                <input
-                                    type="number"
-                                    placeholder="Max selections"
-                                    value={q.maxSelections || ""}
-                                    onChange={(e) => updateQuestion(q.id, "maxSelections", parseInt(e.target.value))}
-                                />
+                                <>
+                                    <input
+                                        type="number"
+                                        placeholder="Maksimalan broj izbora"
+                                        value={q.maxSelections || ""}
+                                        onChange={(e) => updateQuestion(q.id, "maxSelections", e.target.value)}
+                                    />
+                                    <button type="button" onClick={() => addOption(q.id)}>Dodaj opciju</button>
+                                    {q.options.map(opt => (
+                                        <div key={opt.id}>
+                                            <input
+                                                type="text"
+                                                placeholder="Tekst opcije"
+                                                value={opt.text}
+                                                onChange={(e) => updateOption(q.id, opt.id, "text", e.target.value)}
+                                            />
+                                            <input
+                                                type="file"
+                                                onChange={(e) => updateOption(q.id, opt.id, "image", e.target.files[0])}
+                                            />
+                                            {opt.image && <img src={URL.createObjectURL(opt.image)} alt="" />}
+                                        </div>
+                                    ))}
+                                </>
                             )}
+
+                            {q.type === "singleChoice" && (
+                                <>
+                                    <button type="button" onClick={() => addOption(q.id)}>Dodaj opciju</button>
+                                    {q.options.map(opt => (
+                                        <div key={opt.id}>
+                                            <input
+                                                type="text"
+                                                placeholder="Tekst opcije"
+                                                value={opt.text}
+                                                onChange={(e) => updateOption(q.id, opt.id, "text", e.target.value)}
+                                            />
+                                            <input
+                                                type="file"
+                                                onChange={(e) => updateOption(q.id, opt.id, "image", e.target.files[0])}
+                                            />
+                                            {opt.image && <img src={URL.createObjectURL(opt.image)} alt="" />}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+
                             {q.type === "number" && (
                                 <>
                                     <input
@@ -141,31 +263,35 @@ const GoogleFormsPage = () => {
                                     />
                                     <input
                                         type="number"
-                                        placeholder="Step"
+                                        placeholder="Korak"
                                         value={q.step || ""}
                                         onChange={(e) => updateQuestion(q.id, "step", parseInt(e.target.value))}
                                     />
+                                    {q.min !== null && q.max !== null && q.step && (
+                                        <p>
+                                            Lista: {generateNumberList(q.min, q.max, q.step).join(", ")}
+                                        </p>
+                                    )}
                                 </>
                             )}
-                            <input type="file" onChange={(e) => updateQuestion(q.id, "image", e.target.files[0])} />
-                            {q.image && <img src={URL.createObjectURL(q.image)} alt="Question Image" className="question-image" />}
-                            <div>
-                                <button type="button" onClick={() => cloneQuestion(q.id)}>Clone</button>
-                                <button type="button" onClick={() => deleteQuestion(q.id)}>Delete</button>
-                                <button type="button" onClick={() => moveQuestion(q.id, -1)}>Move Up</button>
-                                <button type="button" onClick={() => moveQuestion(q.id, 1)}>Move Down</button>
-                            </div>
+
                             <input
-                                type={q.type === "date" ? "date" : q.type === "time" ? "time" : "text"}
-                                placeholder={q.type === "shortText" ? "Max 512 chars" : q.type === "longText" ? "Max 4096 chars" : ""}
-                                maxLength={q.type === "shortText" ? 512 : q.type === "longText" ? 4096 : undefined}
-                                value={responses[q.id] || ""}
-                                onChange={(e) => handleResponseChange(q.id, e.target.value)}
+                                type="file"
+                                onChange={(e) => updateQuestion(q.id, "image", e.target.files[0])}
                             />
+                            {q.image && <img src={URL.createObjectURL(q.image)} alt="" />}
+
+                            <div className="question-actions">
+                                <button type="button" onClick={() => cloneQuestion(q.id)}>Kloniraj</button>
+                                <button type="button" onClick={() => deleteQuestion(q.id)}>Obriši</button>
+                                <button type="button" onClick={() => moveQuestion(q.id, -1)}>Pomeri gore</button>
+                                <button type="button" onClick={() => moveQuestion(q.id, 1)}>Pomeri dole</button>
+                            </div>
                         </div>
                     ))}
-                    <button type="button" className="form-button" onClick={addQuestion}>Add Question</button>
-                    <button type="submit" className="form-button">Submit</button>
+
+                    <button type="button" onClick={addQuestion}>Dodaj pitanje</button>
+                    <button type="submit">Sačuvaj formu</button>
                 </form>
             </main>
         </div>

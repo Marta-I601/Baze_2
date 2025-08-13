@@ -1,84 +1,165 @@
+/* Osnovni stilovi (light mode default) */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #cccccc;
+    --button-bg: #4caf50;
+    --button-hover: #3f9140;
+    --submit-bg: #2196f3;
+    --submit-hover: #1976d2;
+    --secondary-btn-bg: #dddddd;
+    --secondary-btn-hover: #cccccc;
+}
+
+/* Tamni režim */
+body.dark-mode {
+    --bg-color: #1e1e1e;
+    --text-color: #f0f0f0;
+    --card-bg: #2a2a2a;
+    --input-bg: #333333;
+    --input-border: #555555;
+    --button-bg: #4caf50;
+    --button-hover: #3f9140;
+    --submit-bg: #2196f3;
+    --submit-hover: #1976d2;
+    --secondary-btn-bg: #444444;
+    --secondary-btn-hover: #555555;
+}
+
 .google-forms-container {
-    font-family: 'Poppins', sans-serif;
-    padding: 30px;
-    max-width: 800px;
-    margin: auto;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 .google-forms-header {
     text-align: center;
-    margin-bottom: 25px;
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-}
-
-.google-forms-main {
-    background-color: #f9f9f9;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.form-group {
     margin-bottom: 20px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #444;
+.google-forms-header h1 {
+    margin-bottom: 10px;
+    font-size: 28px;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-    border-color: #4285f4;
-    box-shadow: 0 0 5px rgba(66, 133, 244, 0.3);
-    outline: none;
-}
-
-.form-button {
-    background: linear-gradient(135deg, #4285f4, #357ae8);
-    color: #fff;
-    padding: 12px 25px;
+.google-forms-header button {
+    background: var(--submit-bg);
+    color: white;
     border: none;
-    border-radius: 6px;
+    padding: 8px 14px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: background 0.3s ease;
+}
+
+.google-forms-header button:hover {
+    background: var(--submit-hover);
+}
+
+.google-forms-header a {
+    color: var(--submit-bg);
+    text-decoration: none;
+}
+
+.forms {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
     display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group input[type="number"],
+select {
     width: 100%;
-    text-align: center;
+    padding: 8px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    color: var(--text-color);
 }
 
-.form-button:hover {
-    background: linear-gradient(135deg, #357ae8, #2a65d4);
-}
-
-.form-group textarea {
+textarea {
     resize: vertical;
-    min-height: 100px;
 }
 
-@media (max-width: 768px) {
-    .google-forms-container {
-        padding: 20px;
-    }
+.question-block {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid var(--input-border);
+}
+
+.question-block input[type="text"],
+.question-block input[type="number"],
+.question-block select {
+    margin-bottom: 8px;
+}
+
+.question-block img {
+    max-width: 150px;
+    display: block;
+    margin-top: 8px;
+}
+
+.question-actions {
+    margin-top: 10px;
+}
+
+.question-actions button {
+    margin-right: 8px;
+    background: var(--secondary-btn-bg);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.question-actions button:hover {
+    background: var(--secondary-btn-hover);
+}
+
+button[type="button"] {
+    background: var(--button-bg);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button[type="button"]:hover {
+    background: var(--button-hover);
+}
+
+button[type="submit"] {
+    background: var(--submit-bg);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+    background: var(--submit-hover);
 }

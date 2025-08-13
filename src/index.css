@@ -7,14 +7,14 @@
   box-sizing: border-box;
 }
 
-body {
+body {body, #root {
   font-family: "Poppins", serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: url('./components/assets/image.jpg') no-repeat;
-  background-size: cover;
-  background-position: center;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
-
+}
