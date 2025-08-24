@@ -31,8 +31,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $data->email;
         $password = $data->password; // Lozinka ostaje neheširana
 
+        if (strlen($password) < 8) {
+            echo json_encode(["success" => false, "message" => "Password must be at least 8 characters long"]);
+            exit;
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            echo json_encode(["success" => false, "message" => "Password must contain at least one uppercase letter"]);
+            exit;
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            echo json_encode(["success" => false, "message" => "Password must contain at least one lowercase letter"]);
+            exit;
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            echo json_encode(["success" => false, "message" => "Password must contain at least one number"]);
+            exit;
+        }
+        if (!preg_match('/[\W]/', $password)) {
+            echo json_encode(["success" => false, "message" => "Password must contain at least one special character"]);
+            exit;
+        }
         // Proveri da li email već postoji
-        $checkEmail = "SELECT * FROM probna WHERE email = ?";
+        $checkEmail = "SELECT * FROM korisnik WHERE Email = ?";
         $stmt = $conn->prepare($checkEmail);
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -42,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["success" => false, "message" => "Email address already exists!"]);
         } else {
             // Lozinku čuvamo direktno u bazi (NE PREPORUČUJE SE!)
-            $insertQuery = "INSERT INTO probna (username, email, password) VALUES (?, ?, ?)";
+            $insertQuery = "INSERT INTO korisnik (Username, Email, Šifra) VALUES (?, ?, ?)";
             $stmt = $conn->prepare($insertQuery);
             $stmt->bind_param("sss", $username, $email, $password);
 
@@ -65,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $data->password;
 
         // Pronalazimo korisnika po emailu
-        $sql = "SELECT * FROM probna WHERE email = ?";
+        $sql = "SELECT * FROM korisnik WHERE Email = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -75,10 +95,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $row = $result->fetch_assoc();
             
             // **Sada samo upoređujemo običan string, bez `password_verify()`**
-            if ($password === $row['password']) {
+            if ($password === $row['Šifra']) {
                 session_start();
-                $_SESSION['email'] = $row['email'];
-                echo json_encode(["success" => true, "message" => "Login successful"]);
+                $_SESSION['email'] = $row['Email'];
+                $_SESSION['username'] = $row['Username'];
+                echo json_encode([
+                    "success" => true,
+                    "message" => "Login successful",
+                    "username" => $row['Username']  // sve ide u jedan niz
+                ]);
             } else {
                 echo json_encode(["success" => false, "message" => "Incorrect password"]);
             }
