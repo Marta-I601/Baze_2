@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *"); // Omogućava zahteve sa različitih d
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db = "proba";
+$db = "probna";
 
 // Kreiranje konekcije
 $conn = new mysqli($host, $user, $pass, $db);

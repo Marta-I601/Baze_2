@@ -126,7 +126,7 @@ const GoogleFormsPage = ({ currentUser }) => {
         <div className="google-forms-container">
             <header className="google-forms-header">
                 <div className="header-left">
-                 Dobrodosao na Google Formu!</div>
+                 Dobrodošao, {currentUser || "Gost"} na Google Formu.!</div>
                  <div>
                     <h2>Google Forms</h2>
                 </div>

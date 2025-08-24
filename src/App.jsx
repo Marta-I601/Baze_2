@@ -19,12 +19,12 @@ function App() {
   }, [darkMode]);
 
   const handleSignUp = async () => {
-    const response = await fetch('http://localhost/php/register.php', {
+    const response = await fetch('http://localhost/Baze_2/src/components/php/register.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'signUp',
-        fName: name,
+        username: name,
         email: email,
         password: password,
       }),
@@ -35,7 +35,7 @@ function App() {
   };
 
   const handleSignIn = async () => {
-    const response = await fetch('http://localhost/php/register.php', {
+    const response = await fetch('http://localhost/Baze_2/src/components/php/register.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -49,7 +49,8 @@ function App() {
     setMessage(data.message);
 
     if (data.success) {
-      navigate("/admin");
+      setCurrentUser(data.username);
+      navigate("/forms");
     }
   };
 
@@ -80,7 +81,7 @@ function App() {
             />
           }
         />
-        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin" element={<AdminPanel currentUser={currentUser}/>} />
         <Route path="/forms" element={<GoogleFormsPage currentUser={currentUser} />} />
       </Routes>
     </>
