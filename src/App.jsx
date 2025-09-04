@@ -10,7 +10,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState(null); // <- za čuvanje korisnika
+  const [currentUser, setCurrentUser] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
@@ -46,11 +46,16 @@ function App() {
     });
 
     const data = await response.json();
+    console.log(data);
     setMessage(data.message);
 
     if (data.success) {
       setCurrentUser(data.username);
-      navigate("/forms");
+      if (data.Rola === 0){
+        navigate("/admin");
+      }else {
+        navigate("/forms");
+      }
     }
   };
 

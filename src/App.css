@@ -55,3 +55,135 @@ body {
   background-color: var(--text-color);
   color: var(--bg-color);
 }
+
+/*DODAO ZA ADMIN STRANICU - MARTA MENJAJ AKO TREBA */
+.admin {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--panel-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.admin h1 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid var(--text-color);
+  background-color: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover,
+.tab.active {
+  background-color: var(--text-color);
+  color: var(--bg-color);
+}
+
+/* Sekcija unutar taba */
+.section {
+  padding: 20px;
+}
+
+/* Kartice */
+.card {
+  background-color: var(--panel-bg);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+  transition: background-color 0.5s ease;
+}
+
+/* Tabela za korisnike */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table th,
+.table td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.table th {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Dugmići */
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 5px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #a71d2a;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between; /* h2 levo, search bar desno */
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.users-header h2 {
+  margin: 0;
+}
+
+.search-bar {
+  width: 45%;
+  padding: 6px 10px;
+  border: 1px solid var(--text-color);
+  border-radius: 5px;
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0,123,255,0.5);
+}

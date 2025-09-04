@@ -61,8 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result->num_rows > 0) {
             echo json_encode(["success" => false, "message" => "Email address already exists!"]);
         } else {
-            // Lozinku čuvamo direktno u bazi (NE PREPORUČUJE SE!)
-            $insertQuery = "INSERT INTO korisnik (Username, Email, Šifra) VALUES (?, ?, ?)";
+            $insertQuery = "INSERT INTO korisnik (Username, Email, Šifra, Rola) VALUES (?, ?, ?, 1)";
             $stmt = $conn->prepare($insertQuery);
             $stmt->bind_param("sss", $username, $email, $password);
 
@@ -102,7 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode([
                     "success" => true,
                     "message" => "Login successful",
-                    "username" => $row['Username']  // sve ide u jedan niz
+                    "username" => $row['Username'],
+                    "Rola" => (int)$row['Rola']   // sve ide u jedan niz
                 ]);
             } else {
                 echo json_encode(["success" => false, "message" => "Incorrect password"]);
