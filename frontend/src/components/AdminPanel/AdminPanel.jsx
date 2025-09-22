@@ -7,7 +7,7 @@ export default function AdminPanel({ currentUser }) {
 
   // Učitaj korisnike iz baze
   useEffect(() => {
-    fetch("http://localhost/Baze_2/src/components/php/users.php")
+    fetch("http://localhost/Baze_2/services/users/users.php")
       .then(res => res.json())
       .then(data => setUsers(data))
       .catch(err => console.error("Greška pri učitavanju korisnika:", err));
@@ -16,7 +16,7 @@ export default function AdminPanel({ currentUser }) {
   /*OVO JE ZA BRISANJE KORISNIKA */ 
   const handleDelete = (id) => {
     if (window.confirm("Da li si siguran da želiš da obrišeš korisnika?")) {
-      fetch("http://localhost/Baze_2/src/components/php/delete_user.php", {
+      fetch("http://localhost/Baze_2/services/users/delete_user.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id })
@@ -34,7 +34,7 @@ export default function AdminPanel({ currentUser }) {
 
   /*IZMENA ROLE KORISNIKA - NEMA SMISLA DA ADMIN MENJA BILO ŠTA DRUGO */
   const handleSaveRole = (id, Rola) => {
-    fetch("http://localhost/Baze_2/src/components/php/update_user.php", {
+    fetch("http://localhost/Baze_2/services/users/update_user.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, Rola })

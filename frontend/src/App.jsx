@@ -19,7 +19,7 @@ function App() {
   }, [darkMode]);
 
   const handleSignUp = async () => {
-    const response = await fetch('http://localhost/Baze_2/src/components/php/register.php', {
+    const response = await fetch('http://localhost/Baze_2/services/auth/register.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -35,7 +35,7 @@ function App() {
   };
 
   const handleSignIn = async () => {
-    const response = await fetch('http://localhost/Baze_2/src/components/php/register.php', {
+    const response = await fetch('http://localhost/Baze_2/services/auth/register.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
