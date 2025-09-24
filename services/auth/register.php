@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 include 'connect.php';
 
 header("Content-Type: application/json");
@@ -51,25 +54,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(["success" => false, "message" => "Password must contain at least one special character"]);
             exit;
         }
-        // Proveri da li email već postoji
+        // PROVERA DA L EMAIL POSTOJI
         $checkEmail = "SELECT * FROM korisnik WHERE Email = ?";
         $stmt = $conn->prepare($checkEmail);
+        if (!$stmt) { 
+            echo json_encode(["success" => false, "message" => "SQL Prepare Error: " . $conn->error]);
+            exit;
+        }
         $stmt->bind_param("s", $email);
-        $stmt->execute();
+        if (!$stmt->execute()) { 
+            echo json_encode(["success" => false, "message" => "SQL Execute Error: " . $stmt->error]);
+            exit;
+        }
+        
         $result = $stmt->get_result();
-
         if ($result->num_rows > 0) {
             echo json_encode(["success" => false, "message" => "Email address already exists!"]);
+            exit;
         } else {
-            // Lozinku čuvamo direktno u bazi (NE PREPORUČUJE SE!)
-            $insertQuery = "INSERT INTO korisnik (Username, Email, Šifra) VALUES (?, ?, ?)";
+            $insertQuery = "INSERT INTO korisnik (Username, Email, Šifra, Rola) VALUES (?, ?, ?, 1)";
             $stmt = $conn->prepare($insertQuery);
+            if (!$stmt) { 
+                echo json_encode(["success" => false, "message" => "SQL Prepare Error: " . $conn->error]);
+                exit;
+            }
             $stmt->bind_param("sss", $username, $email, $password);
 
             if ($stmt->execute()) {
                 echo json_encode(["success" => true, "message" => "User registered successfully!"]);
+                exit;
             } else {
                 echo json_encode(["success" => false, "message" => "Database error occurred"]);
+                exit;
             }
         }
     } 
@@ -88,7 +104,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "SELECT * FROM korisnik WHERE Email = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $email);
-        $stmt->execute();
+        
+        if (!$stmt->execute()) {
+            echo json_encode(["success" => false, "message" => "SQL Error: " . $stmt->error]);
+            exit;
+        }
+
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
@@ -99,10 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_start();
                 $_SESSION['email'] = $row['Email'];
                 $_SESSION['username'] = $row['Username'];
+                $_SESSION['userId'] = $row['Id'];
                 echo json_encode([
                     "success" => true,
                     "message" => "Login successful",
-                    "username" => $row['Username']  // sve ide u jedan niz
+                    "currentUser" => [
+                        "id" => $row['Id'],
+                        "username" => $row['Username'],
+                        "Rola" => (int)$row['Rola']
+                    ]
                 ]);
             } else {
                 echo json_encode(["success" => false, "message" => "Incorrect password"]);

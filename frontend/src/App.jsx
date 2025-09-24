@@ -10,7 +10,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState(null); // <- za čuvanje korisnika
+  const [currentUser, setCurrentUser] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ function App() {
   }, [darkMode]);
 
   const handleSignUp = async () => {
-    const response = await fetch('http://localhost/Baze_2/src/components/php/register.php', {
+    const response = await fetch('http://localhost/Baze_2/services/auth/register.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -35,7 +35,7 @@ function App() {
   };
 
   const handleSignIn = async () => {
-    const response = await fetch('http://localhost/Baze_2/src/components/php/register.php', {
+    const response = await fetch('http://localhost/Baze_2/services/auth/register.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -46,11 +46,16 @@ function App() {
     });
 
     const data = await response.json();
+    console.log(data);
     setMessage(data.message);
 
     if (data.success) {
-      setCurrentUser(data.username);
-      navigate("/forms");
+      setCurrentUser(data.currentUser);
+      if (data.currentUser.Rola === 0){
+        navigate("/admin");
+      }else {
+        navigate("/forms");
+      }
     }
   };
 
