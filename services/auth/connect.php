@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *"); // Omogućava zahteve sa različitih domena
+header("Access-Control-Allow-Origin: *");
 $host = "localhost";
 $user = "root";
 $pass = "";

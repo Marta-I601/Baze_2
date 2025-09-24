@@ -50,8 +50,8 @@ function App() {
     setMessage(data.message);
 
     if (data.success) {
-      setCurrentUser(data.username);
-      if (data.Rola === 0){
+      setCurrentUser(data.currentUser);
+      if (data.currentUser.Rola === 0){
         navigate("/admin");
       }else {
         navigate("/forms");

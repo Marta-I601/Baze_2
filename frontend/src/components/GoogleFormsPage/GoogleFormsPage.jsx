@@ -3,296 +3,267 @@ import "./GoogleFormsPage.css";
 import { v4 as uuidv4 } from "uuid";
 
 const GoogleFormsPage = ({ currentUser }) => {
-    const [questions, setQuestions] = useState([]);
-    const [formTitle, setFormTitle] = useState("");
-    const [formDescription, setFormDescription] = useState("");
+    const [forms, setForms] = useState([]);
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [showQuestionForm, setShowQuestionForm] = useState(false); // kontrola podforme
+    const [questions, setQuestions] = useState([]); // lista vizuelno dodatih pitanja
+    const [isSaving, setIsSaving] = useState(false); //Za pravilno čuvanje forme kasnije
+
+    // Za novu formu
+    const [formNaziv, setFormNaziv] = useState("");
+    const [formOpis, setFormOpis] = useState("");
     const [allowAnonymous, setAllowAnonymous] = useState(false);
-    const [shareLink, setShareLink] = useState("");
 
-//  Tema (svetlo/tamno)
- const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem("theme") === "dark";
-            });
-   useEffect(() => {
-        if (darkMode) {
-            document.body.classList.add("dark-mode");
-        } else {
-            document.body.classList.remove("dark-mode");
-        }
-    }, [darkMode]);
-
-    const toggleDarkMode = () => {
-        setDarkMode(prev => !prev);
+    // Funkcija za dodavanje pitanja - samo da vidim na šta liči
+    const addQuestionVisual = () => {
+        setQuestions(prev => [...prev, { text: "Novo pitanje" }]);
+        setShowQuestionForm(false); // zatvara podformu
     };
 
-    // Dodaj novo pitanje
-    const addQuestion = () => {
-        setQuestions([
-            ...questions,
-            {
-                id: uuidv4(),
-                text: "",
-                type: "shortText",
-                required: false,
-                options: [],
-                maxSelections: null,
-                min: null,
-                max: null,
-                step: null,
-                image: null,
+    //Ovo je za load forma iz baze - Biće problem kada zaludi login, jer sesija istekne a ne vraća se na login stranu
+    const loadForms = async () => {
+        if(!currentUser?.id) return;
+        try {
+            const res = await fetch(`http://localhost/Baze_2/services/forms/getForms.php?userId=${currentUser.id}`);
+            const data = await res.json();
+            if(data.success){
+                setForms(data.forms);
+            }else {
+                console.error("Imaš problem so učitanje na formite bratko: ", data.message);
+                setForms([]);
+            }
+        } catch (err) {
+            console.log("Greška sa fetchom: ", err);
+            setForms([]);
+        }
+    };
+
+    /* Simulacija učitavanja formi korisnika - isto da vidim na šta liči - Comment out dok testiram da li radi čitanje forme iz baze
+    useEffect(() => {
+        setForms([
+            { 
+                id: 1, 
+                naziv: "Forma 1", 
+                opis: "Kratki opis forme 1",
+                thumbnail: null
+            },
+            { 
+                id: 2, 
+                naziv: "Forma 2", 
+                opis: "Kratki opis forme 2",
+                thumbnail: null
+            },
+            { 
+                id: 3, 
+                naziv: "Forma 3", 
+                opis: "Kratki opis forme 2",
+                thumbnail: null
+            },
+            { 
+                id: 4, 
+                naziv: "Forma 4", 
+                opis: "Kratki opis forme 3",
+                thumbnail: null
             }
         ]);
-    };
+    }, []); */
 
-    // Ažuriraj polje pitanja
-    const updateQuestion = (id, field, value) => {
-        setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
-    };
+    //Da učita kad se userPromeni
+    useEffect(() => {
+        loadForms();
+    }, [currentUser]);
 
-    // Dodaj opciju odgovora (za single/multiple choice)
-    const addOption = (id) => {
-        setQuestions(questions.map(q =>
-            q.id === id
-                ? { ...q, options: [...q.options, { id: uuidv4(), text: "", image: null }] }
-                : q
-        ));
-    };
+    const toggleCreateForm = () => setShowCreateForm(!showCreateForm);
 
-    // Ažuriraj opciju odgovora
-    const updateOption = (qId, optId, field, value) => {
-        setQuestions(questions.map(q =>
-            q.id === qId
-                ? {
-                    ...q,
-                    options: q.options.map(o =>
-                        o.id === optId ? { ...o, [field]: value } : o
-                    )
-                }
-                : q
-        ));
-    };
-
-    // Kloniraj pitanje
-    const cloneQuestion = (id) => {
-        const questionToClone = questions.find(q => q.id === id);
-        if (questionToClone) {
-            setQuestions([...questions, { ...questionToClone, id: uuidv4() }]);
+    //BASIC Funkcija za unos forme u bazu - samo naziv, opis i allow checkbox
+    const saveForm = async () => {
+        if (isSaving) return;
+        setIsSaving(true);
+        const payload = {
+            userId: currentUser.id, 
+            naziv: formNaziv,
+            opis: formOpis,
+            allowAnonymous: allowAnonymous,
+        };
+        try {
+            const res = await fetch("http://localhost/Baze_2/services/forms/createForm.php", {
+                method: "POST",
+                headers: {"Content-Type" : "application/json"},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert("Forma uspešno kreirana!");
+                await loadForms();
+                //resetuješ polja zatvaraš formu, ne mogu se dodavati pitanja kada je forma već sačuvana linija pre loaduješ
+                setFormNaziv("");
+                setFormOpis("");
+                setAllowAnonymous(false);
+                setShowCreateForm(false);
+                setQuestions([]);
+                setShowQuestionForm(false);
+            }
+            else {
+                alert("Greška: "+data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Ima neka greška brat moi sa server");
+        } finally {
+            setIsSaving(false);
         }
-    };
-
-    // Obriši pitanje
-    const deleteQuestion = (id) => {
-        setQuestions(questions.filter(q => q.id !== id));
-    };
-
-    // Promeni redosled pitanja
-    const moveQuestion = (id, direction) => {
-        const index = questions.findIndex(q => q.id === id);
-        if (index < 0) return;
-        const newIndex = index + direction;
-        if (newIndex < 0 || newIndex >= questions.length) return;
-        const updated = [...questions];
-        [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-        setQuestions(updated);
-    };
-
-    // Generiši listu brojeva za numeric tip
-    const generateNumberList = (min, max, step) => {
-        let list = [];
-        for (let i = min; i <= max; i += step) {
-            list.push(i);
-        }
-        return list;
-    };
-
-    // Kreiraj link za deljenje
-    const createShareLink = () => {
-        const link = `${window.location.origin}/fill-form/${uuidv4()}`;
-        setShareLink(link);
-    };
-
-    // Submit forme
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log({
-            formTitle,
-            formDescription,
-            allowAnonymous,
-            questions
-        });
-    };
+    }
 
     return (
         <div className="google-forms-container">
             <header className="google-forms-header">
-                <div className="header-left">
-                 Dobrodošao, {currentUser || "Gost"} na Google Formu.!</div>
-                 <div>
-                    <h2>Google Forms</h2>
-                </div>
-                <div className="header-right">
-                    <button onClick={toggleDarkMode}>
-                        {darkMode ? "🌙 Tamni mod" : "☀️ Svetli mod"}
-                    </button></div>
-                    <div>
-                    <button onClick={createShareLink}>Generiši link</button>
-                </div>
-                {shareLink && <p>Link: <a href={shareLink}>{shareLink}</a></p>}
+                <h2>Dobrodošao, {currentUser?.username || "Gost"}</h2>
             </header>
 
             <main className="google-forms-main">
-                <form className="forms" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Naziv forme</label>
-                        <input
-                            type="text"
-                            value={formTitle}
-                            onChange={(e) => setFormTitle(e.target.value)}
-                            placeholder="Unesite naziv"
-                        />
+                {/* Lista korisnikovih formi sa thumbnail karticama */}
+                <h3>Moje forme</h3>
+                {forms.length === 0 ? (
+                    <p>Trenutno nemate ni jednu formu.</p>
+                ) : (
+                    <div className="form-list">
+                        {forms.map(f => (
+                            <div key={f.id} className="form-card">
+                                <div className="form-thumbnail">
+                                    <div className="thumbnail-image">
+                                        <img src={f.thumbnail || "https://via.placeholder.com/200x100?text=Forma"} alt="Thumbnail" />
+                                    </div>
+                                    <div className="thumbnail-info">
+                                        <h4>{f.naziv}</h4>
+                                        <p>{f.opis}</p>
+                                    </div>
+                                </div>
+                                <div className="form-actions">
+                                    <button>Edit</button>
+                                    <button>Delete</button>
+                                    <button>Generiši link</button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    <div className="form-group">
-                        <label>Opis</label>
-                        <textarea
-                            value={formDescription}
-                            onChange={(e) => setFormDescription(e.target.value)}
-                            placeholder="Unesite opis"
-                        ></textarea>
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            Dozvoli anonimne odgovore
-                            <input
-                                type="checkbox"
-                                checked={allowAnonymous}
-                                onChange={(e) => setAllowAnonymous(e.target.checked)}
-                            />
-                        </label>
-                    </div>
+                )}
+                 {/* Dugme za kreiranje nove forme */}
+                <button type="button" onClick={toggleCreateForm}>+ Kreiraj novu formu</button>
 
-                    {questions.map((q) => (
-                        <div key={q.id} className="question-block">
-                            <input
-                                type="text"
-                                placeholder="Unesite pitanje"
-                                value={q.text}
-                                onChange={(e) => updateQuestion(q.id, "text", e.target.value)}
+                {/* Forma za kreiranje nove forme */}
+                {showCreateForm && (
+                    <div className="forms">
+                        <h3>Nova forma</h3>
+
+                        {/* Naziv forme */}
+                        <div className="form-group">
+                            <label>Naziv forme</label>
+                            <input 
+                                type="text" 
+                                placeholder="Unesite naziv forme" 
+                                value={formNaziv}
+                                onChange={(e) => setFormNaziv(e.target.value)} 
                             />
+                        </div>
+
+                        {/* Opis forme */}
+                        <div className="form-group">
+                            <label>Opis</label>
+                            <textarea 
+                                placeholder="Unesite opis forme" 
+                                value={formOpis}
+                                onChange={(e) => setFormOpis(e.target.value)} 
+                            />
+                        </div>
+
+                        {/* AllowAnonymous */}
+                        <div className="form-group">
                             <label>
-                                Obavezno
-                                <input
-                                    type="checkbox"
-                                    checked={q.required}
-                                    onChange={(e) => updateQuestion(q.id, "required", e.target.checked)}
+                                Dozvoli popunjavanje i neprijavljenim korisnicima
+                                <input 
+                                type="checkbox" 
+                                checked={allowAnonymous}
+                                onChange={(e) => setAllowAnonymous(e.target.checked)} 
                                 />
                             </label>
-                            <select
-                                value={q.type}
-                                onChange={(e) => updateQuestion(q.id, "type", e.target.value)}
-                            >
-                                <option value="shortText">Kratak tekst (max 512)</option>
-                                <option value="longText">Dug tekst (max 4096)</option>
-                                <option value="singleChoice">Jedan izbor</option>
-                                <option value="multipleChoice">Više izbora</option>
-                                <option value="number">Broj</option>
-                                <option value="date">Datum</option>
-                                <option value="time">Vreme</option>
-                            </select>
-
-                            {q.type === "multipleChoice" && (
-                                <>
-                                    <input
-                                        type="number"
-                                        placeholder="Maksimalan broj izbora"
-                                        value={q.maxSelections || ""}
-                                        onChange={(e) => updateQuestion(q.id, "maxSelections", e.target.value)}
-                                    />
-                                    <button type="button" onClick={() => addOption(q.id)}>Dodaj opciju</button>
-                                    {q.options.map(opt => (
-                                        <div key={opt.id}>
-                                            <input
-                                                type="text"
-                                                placeholder="Tekst opcije"
-                                                value={opt.text}
-                                                onChange={(e) => updateOption(q.id, opt.id, "text", e.target.value)}
-                                            />
-                                            <input
-                                                type="file"
-                                                onChange={(e) => updateOption(q.id, opt.id, "image", e.target.files[0])}
-                                            />
-                                            {opt.image && <img src={URL.createObjectURL(opt.image)} alt="" />}
-                                        </div>
-                                    ))}
-                                </>
-                            )}
-
-                            {q.type === "singleChoice" && (
-                                <>
-                                    <button type="button" onClick={() => addOption(q.id)}>Dodaj opciju</button>
-                                    {q.options.map(opt => (
-                                        <div key={opt.id}>
-                                            <input
-                                                type="text"
-                                                placeholder="Tekst opcije"
-                                                value={opt.text}
-                                                onChange={(e) => updateOption(q.id, opt.id, "text", e.target.value)}
-                                            />
-                                            <input
-                                                type="file"
-                                                onChange={(e) => updateOption(q.id, opt.id, "image", e.target.files[0])}
-                                            />
-                                            {opt.image && <img src={URL.createObjectURL(opt.image)} alt="" />}
-                                        </div>
-                                    ))}
-                                </>
-                            )}
-
-                            {q.type === "number" && (
-                                <>
-                                    <input
-                                        type="number"
-                                        placeholder="Min"
-                                        value={q.min || ""}
-                                        onChange={(e) => updateQuestion(q.id, "min", parseInt(e.target.value))}
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder="Max"
-                                        value={q.max || ""}
-                                        onChange={(e) => updateQuestion(q.id, "max", parseInt(e.target.value))}
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder="Korak"
-                                        value={q.step || ""}
-                                        onChange={(e) => updateQuestion(q.id, "step", parseInt(e.target.value))}
-                                    />
-                                    {q.min !== null && q.max !== null && q.step && (
-                                        <p>
-                                            Lista: {generateNumberList(q.min, q.max, q.step).join(", ")}
-                                        </p>
-                                    )}
-                                </>
-                            )}
-
-                            <input
-                                type="file"
-                                onChange={(e) => updateQuestion(q.id, "image", e.target.files[0])}
-                            />
-                            {q.image && <img src={URL.createObjectURL(q.image)} alt="" />}
-
-                            <div className="question-actions">
-                                <button type="button" onClick={() => cloneQuestion(q.id)}>Kloniraj</button>
-                                <button type="button" onClick={() => deleteQuestion(q.id)}>Obriši</button>
-                                <button type="button" onClick={() => moveQuestion(q.id, -1)}>Pomeri gore</button>
-                                <button type="button" onClick={() => moveQuestion(q.id, 1)}>Pomeri dole</button>
-                            </div>
                         </div>
-                    ))}
 
-                    <button type="button" onClick={addQuestion}>Dodaj pitanje</button>
-                    <button type="submit">Sačuvaj formu</button>
-                </form>
+                        {/* Dugme za dodavanje pitanja */}
+                        {!showQuestionForm && (
+                        <button type="button" onClick={() => setShowQuestionForm(true)}>
+                            + Dodaj pitanje
+                        </button>
+                        )}
+
+                        {/* Podforma za dodavanje pitanja */}
+                        {showQuestionForm && (
+                            <div className="question-form">
+                                <h4>Dodaj pitanje</h4>
+
+                                <div className="question-block">
+                                <label>Kratko pitanje</label>
+                                <input type="text" placeholder="Kratki odgovor" disabled />
+                                </div>
+
+                                <div className="question-block">
+                                <label>Dug tekst</label>
+                                <textarea placeholder="Dug tekst" disabled />
+                                </div>
+
+                                <div className="question-block">
+                                <label>Jedan izbor</label>
+                                <div>
+                                    <input type="radio" disabled /> <label>Opcija 1</label>
+                                </div>
+                                <div>
+                                    <input type="radio" disabled /> <label>Opcija 2</label>
+                                </div>
+                                </div>
+
+                                <div className="question-block">
+                                <label>Više izbora</label>
+                                <div>
+                                    <input type="checkbox" disabled /> <label>Opcija 1</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" disabled /> <label>Opcija 2</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" disabled /> <label>Opcija 3</label>
+                                </div>
+                                <input type="number" placeholder="Maksimalan broj izbora" disabled />
+                                </div>
+
+                                <div className="question-block">
+                                <label>Numeričko pitanje</label>
+                                <input type="number" placeholder="0 - 10, korak 2" disabled />
+                                </div>
+
+                                {/* Dugme za “dodaj pitanje” */}
+                                <button type="button" onClick={addQuestionVisual}>
+                                Dodaj pitanje
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Lista pitanja u formi */}
+                        {questions.length > 0 && (
+                            <div className="question-list">
+                                <h4>Lista pitanja</h4>
+                                {questions.map((q, idx) => (
+                                <div key={idx} className="question-block">
+                                    <label>{q.text}</label>
+                                </div>
+                                ))}
+                            </div>
+                        )}
+                        {/* Dugme sačuvaj formu */}
+                        <button type="submit" onClick={saveForm} disabled={isSaving}>{isSaving ? "Čuvanje..." : "Sačuvaj formu"}</button>
+                    </div>
+                )}
+                {/* Sekcija kolaboratora */}
+                <h3>Kolaboratorske forme</h3>
+                <p>Niste kolaborator ni na jednoj formi.</p>
             </main>
         </div>
     );

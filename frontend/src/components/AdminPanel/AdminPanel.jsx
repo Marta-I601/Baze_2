@@ -48,7 +48,7 @@ export default function AdminPanel({ currentUser }) {
 
   return (
     <div className="admin">
-      <h1>Dobrodošao {currentUser}!</h1>
+      <h1>Dobrodošao {currentUser?.username}!</h1>
 
       {/* Navigacija - tabovi */}
       <div className="tabs">

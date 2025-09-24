@@ -120,11 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_start();
                 $_SESSION['email'] = $row['Email'];
                 $_SESSION['username'] = $row['Username'];
+                $_SESSION['userId'] = $row['Id'];
                 echo json_encode([
                     "success" => true,
                     "message" => "Login successful",
-                    "username" => $row['Username'],
-                    "Rola" => (int)$row['Rola']   // sve ide u jedan niz
+                    "currentUser" => [
+                        "id" => $row['Id'],
+                        "username" => $row['Username'],
+                        "Rola" => (int)$row['Rola']
+                    ]
                 ]);
             } else {
                 echo json_encode(["success" => false, "message" => "Incorrect password"]);

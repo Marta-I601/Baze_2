@@ -76,3 +76,7 @@ Na projektu rade: Marta Ignjatovic 601/2020 (Frontend i testing); Aleksa Cirkovi
 Obzirom da je registracija i logovanje korisnika neophodno da bi neko mogao da pravi formu uredjuje i prosledjuje nas prvi korak je bio da napravimo loginRegister.jsx formu koja je propracena adekvatnim css-om i bazom podataka koja ce pamtiti sve te zabelezene ulaze i logovanja nasih korisnika.
 Sto se tice front i testing dela radila je koleginica Marta Ignjatovic, dok je deo oko php i baze mysql radio kolega Predrag Nikolic.
 Dalji razvoj forme i strane na kojojj ce se praviti je radjen opet u jsx kao GoogleFormsPage propracen css file-om (opet front i testing). Neophodan je dalji razvoj stranice i ubacivanje role-a za uredjivanje forme. 
+
+
+# POKRETANJE
+cd C:\xampp\htdocs\Baze_2\frontend> pa npm start
