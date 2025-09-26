@@ -1,78 +1,53 @@
-# Getting Started with Create React App
+Datum: 26.09.2025.  
+Projektovanje informacionih sistema i baza podataka  
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Opis projekta
+FormApp je web aplikacija za kreiranje i upravljanje formularima, najsličnija Google Forms servisu.  
+Dozvoljava korisnicima da kreiraju forme, definišu pitanja različitih tipova i dele ih sa drugima, dok se svi podaci trajno čuvaju u bazi.  
 
-## Available Scripts
+Aplikacija je razvijena kao mikroservisna arhitektura, sa frontend, backend i bazom podataka kao odvojenim servisima, kontejnerizovanim pomoću Docker-a i ispraćena sa CI [CI = Continuous Integration (kontinuirana integracija)].  
 
-In the project directory, you can run:
 
-### `npm start`
+Funkcionalnosti
+Registracija i prijava korisnika
+- Sistem registracije korisnika sa obaveznom prijavom za kreiranje i popunjavanje nekih formi.  
+- Samo prijavljeni korisnici mogu kreirati formu; neke forme mogu biti popunjene i anonimno (ako je dozvoljeno).  
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Kreiranje i upravljanje formama
+- Definisanje imena i opisa forme
+- Podešavanje vidljivosti forme za neprijavljene korisnike
+- Dodavanje različitih tipova pitanja:
+- Kratak tekstualni odgovor (do 512 karaktera)
+- Dug tekstualni odgovor (do 4096 karaktera)
+- Više ponuđenih odgovora (jedan ili više izbor)
+- Numerički odgovori (lista brojeva ili skala)
+- Datum i vreme  
+- Dodavanje slike u pitanje ili odgovor
+- Mogućnost kloniranja, izmene, brisanja i promene redosleda pitanja
+- Upravljanje kolaboratorima (urednici i posmatrači)
+- Zaključavanje forme tako da nije moguće popunjavanje
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Pregled i izvoz rezultata
+Pregled pojedinačnih i grupnih odgovora.  
+  
+Tehnička arhitektura
+-Frontend: React 
+-Backend: PHP 
+-Baza podataka: MySQL
+-Kontejnerizacija: Docker  
+-CI: Automatizovana kontinualna integracija servisa  
+-Testiranje: Unit i integracioni testovi
 
-### `npm test`
+Tok izvršavanja aplikacije
+1. Korisnik pokreće aplikaciju lokalno ili putem Docker kontejnera.  
+2. Prijava ili registracija korisnika.  
+3. Kreiranje ili popunjavanje forme.  
+4. Backend obrađuje zahteve i komunicira sa bazom podataka.  
+5. Rezultati se prikazuju na frontend-u.  
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Na projektu rade:
+Predrag Nikolic 642/2017 (Backend, fullstack i testing)
+Aleksa Cirkovic 607/2018 (joker);
+Marta Ignjatovic 601/2020 (Frontend, Devops i testing);
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-=======
-# Baze_2
-/*Projekat za faks*/
-Ovde cemo pokusati da nas projekat objasnimo maksimalno po koracima sta je svako od nas radio na ovom projektu. 
-Na projektu rade: Marta Ignjatovic 601/2020 (Frontend i testing); Aleksa Cirkovic 607/2018 (Kubernetis i fullstack); Predrag Nikolic 642/2017 (Backend i Devops).
-Obzirom da je registracija i logovanje korisnika neophodno da bi neko mogao da pravi formu uredjuje i prosledjuje nas prvi korak je bio da napravimo loginRegister.jsx formu koja je propracena adekvatnim css-om i bazom podataka koja ce pamtiti sve te zabelezene ulaze i logovanja nasih korisnika.
-Sto se tice front i testing dela radila je koleginica Marta Ignjatovic, dok je deo oko php i baze mysql radio kolega Predrag Nikolic.
 
