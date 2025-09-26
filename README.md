@@ -43,7 +43,13 @@ Tok izvršavanja aplikacije
 2. Prijava ili registracija korisnika.  
 3. Kreiranje ili popunjavanje forme.  
 4. Backend obrađuje zahteve i komunicira sa bazom podataka.  
-5. Rezultati se prikazuju na frontend-u.  
+5. Rezultati se prikazuju na frontend-u.
+
+Uputstvo za pokretanje:
+-Kloniranje repozitorijuma
+-git clone https://github.com/Marta-I601/Baze_2.git
+-cd Baze_2
+-git checkout Docker
 
 Na projektu rade:
 Predrag Nikolic 642/2017 (Backend, fullstack i testing)
