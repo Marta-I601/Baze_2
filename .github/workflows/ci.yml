@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "Docker" ]
+  pull_request:
+    branches: [ "main", "Docker" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: formsdb
+          MYSQL_USER: appuser
+          MYSQL_PASSWORD: apppassword
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install & build frontend
+      working-directory: ./frontend
+      run: |
+        npm install
+        npm run build
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mysqli, pdo_mysql
+
+    - name: PHP syntax check
+      run: find ./backend -name "*.php" -exec php -l {} \;
+
+    - name: Install Composer dependencies
+      working-directory: ./backend
+      run: |
+        if [ -f "composer.json" ]; then composer install --no-interaction --no-progress --prefer-dist; fi
+
+    - name: Run backend tests
+      working-directory: ./backend
+      run: |
+        if [ -f "vendor/bin/phpunit" ]; then vendor/bin/phpunit; else echo "No PHPUnit tests found"; fi
