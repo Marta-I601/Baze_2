@@ -108,6 +108,10 @@ button {
   padding-right: 5px;
 }
 .question-item {
+  display: flex;          
+  align-items: flex-start; 
+  justify-content: space-between;
+  gap: 10px;
   background: #fdfdfd;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -117,6 +121,20 @@ button {
 .question-item ul {
   margin: 8px 20px;
   color: #555;
+}
+/* Ikonice */
+.question-actions {
+  display: flex;
+  gap: 5px;
+  min-width: 24px;
+}
+
+.question-actions span {
+  font-size: 14px;
+  cursor: pointer;
+}
+.question-text {
+  flex: 1;
 }
 .question-list h3 {
   margin-bottom: 12px;

@@ -5,17 +5,24 @@ import "./GoogleFormsPage.css";
 
 const GoogleFormsPage = ({ currentUser }) => {
   const [forms, setForms] = useState([]);
+  const [filteredForms, setFilteredForms] = useState([]);
   const [page, setPage] = useState("home");
   const [activeFormId, setActiveFormId] = useState(null);
-  const [activeFormData, setActiveFormData] = useState(null); 
+  const [activeFormData, setActiveFormData] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");  
 
   const loadForms = async () => {
     if (!currentUser?.id) return;
     try {
       const res = await fetch(`http://localhost/Baze_2/services/forms/getForms.php?userId=${currentUser.id}`);
       const data = await res.json();
-      if (data.success) setForms(data.forms);
-      else setForms([]);
+      if (data.success) {
+        setForms(data.forms);
+        setFilteredForms(data.forms);
+      } else {
+        setForms([]);
+        setFilteredForms([]);
+      }
     } catch (err) {
       console.error("Greška pri učitavanju formi: ", err);
       setForms([]);
@@ -25,6 +32,16 @@ const GoogleFormsPage = ({ currentUser }) => {
   useEffect(() => {
     loadForms();
   }, [currentUser]);
+
+  // Pretraga formi po nazivu
+  useEffect(() => {
+    if (!searchTerm) {
+      setFilteredForms(forms);
+    } else {
+      const filtered = forms.filter(f => f.naziv.toLowerCase().includes(searchTerm.toLowerCase()));
+      setFilteredForms(filtered);
+    }
+  }, [searchTerm, forms]);
 
   //Callback kada je forma kreirana
   const handleFormCreated = (formId, formData) => {
@@ -56,12 +73,21 @@ const GoogleFormsPage = ({ currentUser }) => {
       </header>
 
       <main className="google-forms-main">
-        <h3>Moje forme</h3>
+        <div className="forms-header">
+          <h3>Moje forme</h3>
+          <input
+            type="text"
+            placeholder="Pretraži forme..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
         {forms.length === 0 ? (
           <p>Trenutno nemate ni jednu formu.</p>
         ) : (
           <div className="form-list">
-            {forms.map(f => (
+            {filteredForms.map(f => (
               <div key={f.id} className="form-card">
                 <div className="form-thumbnail">
                   <div className="thumbnail-image">

@@ -152,6 +152,203 @@ const AddQuestionsPage = ({ formId, formData, onDone }) => {
     onDone();
   };
 
+  //FUNKCIJA ZA KOPIRANJE PITANJA - NE IDE ODMA ISPOD ORIGINALA JER IM REDOSLED DAJEM PRI KREIRANJU
+   const cloneQuestion = async (q) => {
+        try {
+        const bodyData = {
+            formId,
+            text: q.text,
+            type: q.type,
+            obavezno: q.obavezno,
+            options: q.options || [],
+            redosled: questions.length + 1,
+        };
+
+        if (q.type === "numericki") {
+            bodyData.numericType = q.numericType;
+            bodyData.start = q.start;
+            bodyData.end = q.end;
+            bodyData.step = q.step;
+        }
+
+        if (q.type === "vise_od_odabranih") {
+            bodyData.requireMinSelections = q.requireMinSelections || false;
+            if (q.requireMinSelections) {
+            bodyData.minSelections = q.minSelections;
+            }
+        }
+
+        const res = await fetch("http://localhost/Baze_2/services/forms/createQuestion.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData),
+        });
+
+        const text = await res.text();
+        const data = JSON.parse(text);
+
+        if (data.success) {
+            setQuestions(prev => [...prev, { ...q, id: data.questionId, Redosled: questions.length + 1 }]);
+        } else {
+            alert("Greška prilikom kloniranja: " + data.message);
+        }
+        } catch (err) {
+        console.error(err);
+        alert("Greška sa serverom prilikom kloniranja pitanja");
+        }
+    };
+
+    //FUNKCIJA ZA BRISANJE PITANJA
+    const deleteQuestion = async (questionId) => {
+        if (!window.confirm("Da li ste sigurni da želite da obrišete pitanje?")) return;
+
+        try {
+            const res = await fetch(`http://localhost/Baze_2/services/forms/deleteQuestion.php?id=${questionId}`, {
+            method: "DELETE",
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+            // Ukloni pitanje iz lokalnog state-a
+            setQuestions(prev => prev.filter(q => q.id !== questionId));
+            } else {
+            alert("Greška prilikom brisanja pitanja: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Greška sa serverom prilikom brisanja pitanja");
+        }
+    };
+
+    //FUNKCIJA ZA IZMENU PITANJA - RADNA, NE MENJAJU SE OPCIJE PITANJA
+    const [editingQuestion, setEditingQuestion] = useState(null);
+
+    const startEditQuestion = (q) => {
+    setEditingQuestion(q);
+        setNewQuestion({
+            text: q.text,
+            type: q.type,
+            obavezno: q.obavezno,
+            options: q.options || [],
+            numericType: q.numericType || null,
+            start: q.start || "",
+            end: q.end || "",
+            step: q.step || "",
+            requireMinSelections: q.requireMinSelections || false,
+            minSelections: q.minSelections || 0,
+        });
+        setShowNewQuestion(true);
+    };
+
+    const confirmEditQuestion = async () => {
+        try {
+            const bodyData = {
+            id: editingQuestion.id,
+            text: newQuestion.text,
+            type: newQuestion.type,
+            obavezno: newQuestion.obavezno,
+            options: newQuestion.options,
+            redosled: editingQuestion.Redosled,
+            };
+
+            if (newQuestion.type === "numericki") {
+            bodyData.numericType = newQuestion.numericType;
+            bodyData.start = newQuestion.start;
+            bodyData.end = newQuestion.end;
+            bodyData.step = newQuestion.step;
+            }
+
+            if (newQuestion.type === "vise_od_odabranih") {
+            bodyData.requireMinSelections = newQuestion.requireMinSelections || false;
+            if (newQuestion.requireMinSelections) bodyData.minSelections = newQuestion.minSelections;
+            }
+
+            const res = await fetch("http://localhost/Baze_2/services/forms/updateQuestion.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+            setQuestions(prev => prev.map(q => q.id === editingQuestion.id ? { ...q, ...newQuestion } : q));
+            setEditingQuestion(null);
+            setShowNewQuestion(false);
+            setNewQuestion({ text: "", type: "kratki_tekst", obavezno: false, options: [] });
+            } else {
+            alert("Greška: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Greška sa serverom prilikom izmene pitanja");
+        }
+    };
+
+    //FUNKCIJE ZA POMERANJE REDOSLEDA PITANJA
+    const moveQuestionUp = async (index) => {
+        if (index === 0) return; // prvo ne možeš više gore
+
+        const newQuestions = [...questions];
+        const current = newQuestions[index];
+        const above = newQuestions[index - 1];
+
+        // Menjanje redosleda
+        const tempRedosled = current.Redosled;
+        current.Redosled = above.Redosled;
+        above.Redosled = tempRedosled;
+
+        // Menjanje pitanja u nizu
+        newQuestions[index - 1] = current;
+        newQuestions[index] = above;
+
+        setQuestions(newQuestions);
+
+        // Čuvanje redosleda
+        await updateQuestionOrder(current.id, current.Redosled);
+        await updateQuestionOrder(above.id, above.Redosled);
+    };
+
+    const moveQuestionDown = async (index) => {
+        if (index === questions.length - 1) return; // Poslednje pitanje ne možeš u zemlju
+
+        const newQuestions = [...questions];
+        const current = newQuestions[index];
+        const below = newQuestions[index + 1];
+
+        // Zamena redosled
+        const tempRedosled = current.Redosled;
+        current.Redosled = below.Redosled;
+        below.Redosled = tempRedosled;
+
+        // Zamena pitanja u nizu
+        newQuestions[index + 1] = current;
+        newQuestions[index] = below;
+
+        setQuestions(newQuestions);
+
+        await updateQuestionOrder(current.id, current.Redosled);
+        await updateQuestionOrder(below.id, below.Redosled);
+    };
+
+    // Funkcija za update redosleda u bazi
+    const updateQuestionOrder = async (questionId, redosled) => {
+        try {
+            const res = await fetch("http://localhost/Baze_2/services/forms/updateQuestion.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: questionId, redosled }),
+            });
+            const data = await res.json();
+            if (!data.success) console.error("Greška pri promeni redosleda:", data.message);
+        } catch (err) {
+            console.error("Server error:", err);
+        }
+    };
+
+
+
   return (
     <div className="add-questions-container">
       <button className="close-btn" onClick={() => onDone()}>X</button>
@@ -322,7 +519,12 @@ const AddQuestionsPage = ({ formId, formData, onDone }) => {
                 )}
             </div>
           )}
-          <button className="btn-secondary" onClick={confirmQuestion}>Potvrdi pitanje</button>
+          <button
+            className="btn-secondary"
+            onClick={editingQuestion ? confirmEditQuestion : confirmQuestion}
+            >
+            {editingQuestion ? "Sačuvaj izmene" : "Potvrdi pitanje"}
+          </button>
         </div>
       )}
 
@@ -332,12 +534,22 @@ const AddQuestionsPage = ({ formId, formData, onDone }) => {
           <h3>Lista pitanja</h3>
           {questions
             .sort((a, b) => a.Redosled - b.Redosled)
-            .map(q => (
+            .map((q,index) => (
               <div key={q.id} className="question-item">
                 {q.text} ({q.obavezno ? "Obavezno" : "Neobavezno"}) - {q.type}
                 {q.options && q.options.length > 0 && (
                   <ul>{q.options.map((o,i) => <li key={i}>{o}</li>)}</ul>
                 )}
+                {/* Dugmad za akcije */}
+                <div className="question-actions">
+                    <div className="question-actions">
+                        <span title="Kloniraj" onClick={() => cloneQuestion(q)}>📄</span>
+                        <span title="Izmeni" onClick={() => startEditQuestion(q)}>✏️</span>
+                        <span title="Obriši" onClick={() => deleteQuestion(q.id)}>🗑️</span>
+                        <span title="Pomeri gore" onClick={() => moveQuestionUp(index)}>⬆️</span>
+                        <span title="Pomeri dole" onClick={() => moveQuestionDown(index)}>⬇️</span>
+                    </div>
+                </div>
             </div>
           ))}
         </div>
