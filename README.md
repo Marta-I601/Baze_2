@@ -8,6 +8,8 @@ Dozvoljava korisnicima da kreiraju forme, definišu pitanja različitih tipova i
 Aplikacija je razvijena kao mikroservisna arhitektura, sa frontend, backend i bazom podataka kao odvojenim servisima, kontejnerizovanim pomoću Docker-a i ispraćena sa CI [CI = Continuous Integration (kontinuirana integracija)].  
 
 
+
+
 Funkcionalnosti
 Registracija i prijava korisnika
 - Sistem registracije korisnika sa obaveznom prijavom za kreiranje i popunjavanje nekih formi.  
